@@ -74,3 +74,55 @@ variable "db_image_name" {
         type = string
         default = "riteshsoni296/mongo_server"
 }
+
+variable "mongo_volume_name" {
+        type= string
+        description = "Mongo persistentvolume name"
+        default = "mongo-persistent-vol"
+}
+
+variable "mongo_data_directory"{
+        type = string
+        default = "/data/db"
+}
+
+variable "app_storage" {
+        type = string
+        description = " Application Server Persistent Volume Storage"
+        default = "1Gi"
+}
+
+variable "app_pvc_access_mode" {
+        type = list
+        default = ["ReadWriteMany"]
+}
+
+variable "app_image_name" {
+        type = string
+        default = "riteshsoni296/nodejs_app:v1"
+}
+
+
+variable "app_port" {
+        type = number
+        default = 80
+        description = "Port for external Connectivity"
+}
+
+variable "app_container_port" {
+        type = number
+        description = "Port of Application running in Pod"
+        default = 3000
+}
+
+
+variable "app_volume_name" {
+        type        = string
+        description = "Node JS Application persistentvolume name"
+        default     = "app-persistent-vol"
+}
+
+variable "app_data_directory"{
+        type    = string
+        default = "/usr/src/app"
+}
