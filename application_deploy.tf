@@ -62,6 +62,7 @@ resource "kubernetes_deployment" "app_deployment" {
                                         name = "app-container"
                                         image = var.app_image_name
                                         port {
+                                                name= "app-port"
                                                 container_port = var.app_container_port
                                         }
                                         env {
@@ -126,6 +127,12 @@ resource "kubernetes_deployment" "app_deployment" {
 resource "kubernetes_service" "app_service" {
         metadata {
                 name = "app-svc"
+                annotations = {
+                        #"service.beta.kubernetes.io/aws-load-balancer-type" = "nlb"
+                        "service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled" = "true"
+                        "service.beta.kubernetes.io/aws-load-balancer-connection-draining-enabled" = "true"
+                        "service.beta.kubernetes.io/aws-load-balancer-connection-draining-timeout" = "60"
+                }
         }
         spec{
                 selector = {
@@ -139,6 +146,5 @@ resource "kubernetes_service" "app_service" {
                 type = "LoadBalancer"
         }
 }
-
 
 
