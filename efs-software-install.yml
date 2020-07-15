@@ -1,0 +1,10 @@
+---
+- hosts: all
+  gather_facts: false
+  become: true
+  become_user: root
+  tasks:
+    - name: "Install Software"
+      yum:
+        name: amazon-efs-utils
+        state: latest
