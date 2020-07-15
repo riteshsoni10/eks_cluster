@@ -1,28 +1,5 @@
 ## Node JS Application
 
-## Persistent Volume for Application Pods
-resource "kubernetes_persistent_volume_claim" "app_pvc" {
-        depends_on = [
-                kubernetes_storage_class.efs_storage_class
-        ]
-        metadata {
-                name = "app-pvc"
-                annotations = {
-                        "volume.beta.kubernetes.io/storage-class" = kubernetes_storage_class.efs_storage_class.id
-                }
-        }
-        spec {
-                resources {
-                        requests = {
-                                storage = var.app_storage
-                        }
-                }
-                access_modes = var.app_pvc_access_mode
-        }
-}
-
-
-
 ## Deployment Resource for App Pods
 
 resource "kubernetes_deployment" "app_deployment" {
@@ -102,20 +79,8 @@ resource "kubernetes_deployment" "app_deployment" {
                                                 name  = "DATABASE_PORT"
                                                 value = var.mongo_db_port
                                         }
-                                        /*
-                                        volume_mount{
-                                                name       = var.app_volume_name
-                                                mount_path = var.app_data_directory
-                                        }*/
                                 }
-                                /*
-                                volume {
-                                        name = var.app_volume_name
-                                        persistent_volume_claim {
-                                                claim_name = kubernetes_persistent_volume_claim.app_pvc.metadata[0].name
-                                        }
-                                }*/
-                        }
+                       }
                 }
         }
 }
