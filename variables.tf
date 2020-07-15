@@ -8,12 +8,46 @@ variable "user_profile" {
         description = "AWS IAM User Profile to launch or configure resources"
 }
 
-variable "worker_node_ip_file_name"{
+
+variable "eks_role_name" {
+	type =  string
+        description = "EKS Cluster Role Name"
+}
+
+
+variable "vpc_id" {
+	type = string
+        description = "VPC id for the EKS Cluster"
+}
+
+variable "eks_cluster_name" {
+	type = string
+        description = "Cluster Name"
+}
+
+variable "node_group_role_name" {
+	type= string
+	default= "NodeGroup-Role"
+        description = "Node Group role name"
+}
+
+variable "eks_node_group_name_1" {
+	type = string
+	description = "1st Node Group Name "
+}
+
+
+variable "eks_node_group_name_2" {
+        type = string
+	description = "1st Node Group Name "
+}
+
+variable "worker_node_ip_file_name" {
         type = string
         description = "file name to keep worker nodes Puublic IPs"
         default = "host"
 }
-variable "mongo_db_port"{
+variable "mongo_db_port" {
         type = number   
         description = "Mongo DB Server Port"
         default = 27017
