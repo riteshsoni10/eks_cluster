@@ -299,6 +299,15 @@ resource "kubernetes_storage_class" "efs_storage_class" {
 
 ## Application Deployment 
 
+In Application deployment we will be using 
+
+- `Persistent Volume Claim` for data persistency even after the lifetime of the application pods. 
+- `Service resource` type for internal and external connetivity of the applications
+- `Secret resource` type to encode the credentials
+- `Deployment` resource for fault tolerance of the aplication pods
+
+### Persistent Volume Claim
+
 The Application deploymenent in EKS cluster. Persistent volume claim resource is created to make the data stored in the database pods permanent 
 
 ```
@@ -324,19 +333,20 @@ resource "kubernetes_persistent_volume_claim" "mongo_pvc" {
 }
 ```
 
+### Service Resource 
 
 **Service Resource** in EKS Cluster creates the load balancer in Cluster based on the `type` parameter. There are three types of services. They are as follows:
 
-a. LoadBalancer
+**a. LoadBalancer**
 
 	The EKS Cluster luanches the load balancer i.e Network,Application and Classic type load balancers.
 
-b. ClusterIP
+**b. ClusterIP**
 
 	The service created with this type will not be accessible from outside network, i.e; It will be connected 
 	only from the worker nodes
 
-c. NodeIP
+**c. NodeIP**
 
 	It is used for application external access from outside the woker nodes.
 	
@@ -344,7 +354,6 @@ HCL Code to create service resource for internal connecctivity of database pod w
 
 ```
 ## Kubernetes Service resource for Database server
-
 resource "kubernetes_service" "monogo_service" {
         metadata {
                 name = "mongo-db-svc"
@@ -359,6 +368,28 @@ resource "kubernetes_service" "monogo_service" {
                 }
                 cluster_ip = "None"
         }
+}
+```
+
+### Secret Resource
+
+Secret resource is used to encode the confidentials in kubernetes cluster. 
+
+```
+## Secret Resource for Database Pods
+resource "kubernetes_secret" "mongo_secret" {
+	metadata{
+		name = "mongo-db-secret"
+	}
+
+	data = {
+		root_username = "mongoadmin"
+		root_password = "admin123"
+		username = "appuser"
+		password = "app1123"
+		database = "nodejsdemo"
+	}
+  
 }
 ```
 
