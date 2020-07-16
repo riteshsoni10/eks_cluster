@@ -412,4 +412,4 @@ The deployment kubernetes resource is created to implement fault tolerance behav
 | eks_cluster_endpoint | Domain name Endpoint corresponding EKS Cluster |
 | eks_cluster_role_arn | IAM Role ARN for EKS Cluster |
 | node_group_arn | IAM Role ARN for Node Group|
-
+| application_lb_end_point | Application Load Balancer Endpoint|
