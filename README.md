@@ -378,7 +378,7 @@ The deployment kubernetes resource is created to implement fault tolerance behav
 You should have configured IAM profile in the controller node and all the pre-requisites. 
 
 1. Clone this repository
-2. Change the working directory to `automation_script`
+2. Change the working directory to `automation-scripts`
 3. Switch to the Admin or root user on controller node.
 4. Run `terraform init`
 5. Then, `terraform plan`, to see the list of resources that will be created
