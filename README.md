@@ -278,7 +278,44 @@ resource "kubernetes_deployment" "efs_provisioner_deployment" {
 }
 ```
 
-We would require to create our own custom storage class. There are two types of volume provisioning  i.e static and dynamic. In dynamic volume provisioning `Persistent Volume Claim` requests the storage directly from the Storage Class. 
+We need to configure the parameter `automount_service_account_token` to *true*, since when the resource is launched using terraform code, the *service_accounts* are not mounted to the application pods when they are launched. A **service account** provides an identity for processes that run in a Pod. It helps to assign special priviledges to the application Pods.
+
+The `locals` block is used to define local variables in the code.
+
+> Parameters
+```
+metadata              => The information about the Deployment Resource
+spec.replicas         => The number of application pods to be managed using ReplicaSet
+selector.match_labels => The value is used to monitor pods with same labels.
+strategy              => To 
+```
+
+#### Deployment Strategies
+
+The various different strategies are as follows:
+
+**a. Recreate**
+
+	Terminate the old version pods and release the pod with new version.
+	
+**b. Ramped**
+
+	Release a new version of application pods on a rolling update fashion, one after the other
+    
+**c. Blue/Green** 
+
+	Release a new version of application pods alongside the old version then switch traffic
+    
+**d. Canary** 
+
+	Release a new version to a subset of users, then proceed to a full rollout
+    
+**e. A/B testing**
+
+	Release a new version to a subset of users in a precise way (HTTP headers, cookie, weight, etc.). A/B testing is really a technique for making business decisions based on statistics but we will briefly describe the process. This doesn’t come out of the box with Kubernetes, it implies extra work to setup a more advanced infrastructure (Istio, Linkerd, Traefik, custom nginx/haproxy, etc).
+
+
+There are two types of volume provisioning  i.e static and dynamic. In dynamic volume provisioning `Persistent Volume Claim` requests the storage directly from the Storage Class. Since, we will be using EFS service for PVC, so we need to create custom storage class to provision volumes.
 
 ```
 ## EFS Storage Class
@@ -394,6 +431,7 @@ resource "kubernetes_secret" "mongo_secret" {
 }
 ```
 
+### Deployment Resource
 
 ## Inputs
 
