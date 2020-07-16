@@ -310,7 +310,7 @@ resource "kubernetes_persistent_volume_claim" "mongo_pvc" {
         metadata {
                 name = "mongo-db-pvc"
                 annotations = {
-                        "volume.beta.kubernetes.io/storage-class" = kubernetes_storage_class.efs_storage_class.id
+                   "volume.beta.kubernetes.io/storage-class" = kubernetes_storage_class.efs_storage_class.id
                 }
         }
         spec {
@@ -333,8 +333,8 @@ a. LoadBalancer
 
 b. ClusterIP
 
-	The service created with this type will not be accessible from outside network, i.e; It will be connected only 
-	from the worker nodes
+	The service created with this type will not be accessible from outside network, i.e; It will be connected 
+	only from the worker nodes
 
 c. NodeIP
 
@@ -351,8 +351,8 @@ resource "kubernetes_service" "monogo_service" {
         }
         spec{
                 selector = {
-                        app = kubernetes_deployment.mongo_deployment.spec[0].template[0].metadata[0].labels.app
-                        tier = kubernetes_deployment.mongo_deployment.spec[0].template[0].metadata[0].labels.tier
+                   app = kubernetes_deployment.mongo_deployment.spec[0].template[0].metadata[0].labels.app
+                   tier = kubernetes_deployment.mongo_deployment.spec[0].template[0].metadata[0].labels.tier
                 }
                 port {
                         port = var.mongo_db_port
