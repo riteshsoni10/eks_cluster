@@ -169,7 +169,6 @@ ansible-playbook -i ${var.worker_node_ip_file_name} efs-software-install.yml -u 
 
 Elastic File System is file storage as Service provided by the Amazon Web Services. EFS works in a similiar way as Network File System. We will be creating EFS and allowing ingress traffic on TCP port 2049 i.e NFS Server port.
 
-
 ```
 resource "aws_efs_file_system" "nfs_server" {
   creation_token = "eks-efs-cluster"
@@ -179,7 +178,7 @@ resource "aws_efs_file_system" "nfs_server" {
 }
 ```
 
-Ingress or Security group for the Elastic File System Service
+We need to configure Ingress or Security group for the Elastic File System Service to allow EKS cluster worker nodes to mount the pods with the EFS filesystem.
 
 ```
 ## Security Group for EFS Cluster
@@ -209,74 +208,7 @@ resource "aws_security_group" "efs_security_group"{
 
 The Kubernetes does not have by-default support for EFS Storage Provisioner. We need to create custom Storage class to provision the peristent volumes for the kubernetes pods. S will be creating deployment resource in kubernetes  
 
-HCL Code to create EFS-deployment resource
-
-```
-## EFS Storage Class Custom Provisioner Deployment
-locals {
-	env_variables ={
-		"FILE_SYSTEM_ID": aws_efs_mount_target.efs_mount_details[0].file_system_id
-		"AWS_REGION" : var.region_name
-		"PROVISIONER_NAME" : var.efs_storage_provisioner_name
-	}
-}
-
-resource "kubernetes_deployment" "efs_provisioner_deployment" {
-	depends_on = [
-		aws_eks_node_group.eks_node_group,
-		aws_eks_node_group.eks_node_group_2,
-		kubernetes_cluster_role_binding.efs_provisioner_role_binding,
-	]
-	metadata {
-		name = "efs-provisioner"
-		namespace = "eks-efs"
-	}
-	spec {
-		replicas = 1
-		selector {
-			match_labels = {
-				app = "efs-provisioner"
-			}
-		}
-		strategy {
-			type = "Recreate"
-		}
-		template {
-			metadata{
-				labels = {
-					app = "efs-provisioner"
-				}
-			}
-			spec {
-				service_account_name = "efs-sa"
-				automount_service_account_token = true
-				container {
-					image = "quay.io/external_storage/efs-provisioner:v0.1.0"
-					name = "efs-provisioner"
-					dynamic "env" {
-					    for_each = local.env_variables
-					    content {
-					      name  = env.key
-					      value = env.value
-					    }
-					  }
-					volume_mount {
-						name = "pv-volume"
-            					mount_path = "/persistentvolumes"
-					}
-				}
-				volume {
-					name = "pv-volume"
-					nfs {
-						path = "/"
-						server = aws_efs_mount_target.efs_mount_details[0].dns_name
-					}
-				}
-			}
-		}
-	}
-}
-```
+*HCL Code* to create EFS-deployment resource is uploaded in repository with name **efs-provisioner.tf**.
 
 We need to configure the parameter `automount_service_account_token` to *true*, since when the resource is launched using terraform code, the *service_accounts* are not mounted to the application pods. A **service account** provides an identity for processes that run in a Pod. It helps to assign special priviledges to the application Pods.
 
@@ -336,6 +268,7 @@ resource "kubernetes_storage_class" "efs_storage_class" {
 	]
 }
 ```
+
 
 ## Application Deployment 
 
@@ -436,6 +369,7 @@ resource "kubernetes_secret" "mongo_secret" {
 
 ### Deployment Resource
 
+The deployment kubernetes resource is created to implement fault tolerance behaviour while running pods i.e, to restart the application pods in case anyone of them fails.
 
 
 ## Inputs
@@ -448,8 +382,11 @@ resource "kubernetes_secret" "mongo_secret" {
 | eks_role_name | Role Name  to be attached with EKS Cluster | string | `` | yes |
 | eks_cluster_name | Name for EKS Cluster | string | `eks-cluster` | no |
 | node_group_role_name | Role Name  to be attached with EKS Cluster Node group | string | `` | yes |
+| worker_nodes_key_name | KeyName to SSH in Worker Nodes | string | `worker-nodes-key` | no |
 | eks_node_group_name_1 | Name for the 1st Node Group | string | `` | yes |
+| node_group_1_instance_types | Instance Types for Node Group 1 | list(string) | `["t2.small"]` | yes |
 | eks_node_group_name_2 | Name for the 2st Node Group | string | `` | yes |
+| node_group_2_instance_types | Instance Types for Node Group 2 | list(string) | `["t2.micro"]` | yes |
 | worker_node_ip_file_name | Name of file to store Public IPs of worker nodes | string | `hosts` | no |
 | mongo_db_port | Mongo Database Server Port | number | `27017`| yes |
 | mongo_db_storage | Storage Requirement for Persitent Volume in Database server pod | string | `1Gi` | yes |
@@ -461,3 +398,18 @@ resource "kubernetes_secret" "mongo_secret" {
 | app_image_name | Docker image name for Application Server | string | `` | yes |
 | app_port | Application Port for external Connectivity | number | `80` | yes |
 | app_container_port | Port of Application running in Pod | number | `3000` | yes |
+
+## Output
+
+| Name | Description |
+|------|-------------|
+| vpc_cidr_block | VPC CIDR Block |
+| subnet_ids | List of VPC Subnet Ids |
+| efs_cluster_dns_name | EFS Cluster DNS Endpoint |
+| efs_cluster_id | EFS Cluster File System Uninque Id |
+| efs_security_group_id |Security Group Id attached to EFS Cluster|
+| efs_storage_class_id | EFS Storage Class Id |
+| eks_cluster_endpoint | Domain name Endpoint corresponding EKS Cluster |
+| eks_cluster_role_arn | IAM Role ARN for EKS Cluster |
+| node_group_arn | IAM Role ARN for Node Group|
+
