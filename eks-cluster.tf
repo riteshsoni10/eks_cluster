@@ -171,3 +171,16 @@ resource "null_resource" "worker_nodes_public_ip" {
         ]
 
 }
+
+
+
+## Enable EFS on Worker Nodes using Ansible Automation
+resource "null_resource" "efs_enable_worker_nodes" {
+        provisioner "local-exec" {
+                command = "chmod 600 ${local_file.store_instance_key.filename} && ansible-playbook -i ${var.worker_node_ip_file_name} efs-software-install.yml -u ec2-user --private-key ${local_file.store_instance_key.filename} --ssh-extra-args='-o stricthostkeychecking=no'"
+        }
+        depends_on = [
+                null_resource.worker_nodes_public_ip
+        ]
+}
+
