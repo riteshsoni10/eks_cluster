@@ -154,13 +154,15 @@ resource "aws_eks_node_group" "eks_node_group"{
 We need to install software on all the worker nodes to enable high availability of persistent volumes used for Application deployment in Worker nodes. In EKS cluster worker nodes, the instances are tagged with Tag with `Name` : *eks:cluster-name* and `Value` : *cluster_name*. So we will be using AWS CLI to fetch Public IPS of all the instances or worker nodes with the tags to install the required packages using Ansible playbook.
 
 ```
-aws ec2 describe-instances  --query \"Reservations[*].Instances[?Tags[?Key=='eks:cluster-name'&&Value=='${var.eks_cluster_name}']&&State.Name=='running'].[PublicIpAddress]\" --profile ${var.user_profile} --output text 
+aws ec2 describe-instances  --query \"Reservations[*].Instances[?Tags[?Key=='eks:cluster-name'\
+&&Value=='${var.eks_cluster_name}']&&State.Name=='running'].[PublicIpAddress]\" --profile ${var.user_profile} --output text 
 ```
 
 We will be storing the Public IPs in the `hosts` file to be used in ansible automation too install the softwares in the worker nodes.The playbook is present in the reposritory with name *efs-software-install.yml*.
 
 ```
-ansible-playbook -i ${var.worker_node_ip_file_name} efs-software-install.yml -u ec2-user --private-key ${local_file.store_instance_key.filename} --ssh-extra-args='-o stricthostkeychecking=no
+ansible-playbook -i ${var.worker_node_ip_file_name} efs-software-install.yml -u ec2-user \
+--private-key ${local_file.store_instance_key.filename} --ssh-extra-args='-o stricthostkeychecking=no
 ```
 
 ## Elastic File System
