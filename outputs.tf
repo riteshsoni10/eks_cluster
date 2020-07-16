@@ -35,3 +35,11 @@ output "eks_cluster_role_arn" {
 output "node_group_arn" {
     value = aws_iam_role.node_group_role.arn
 }
+
+output "application_lb_end_point" {
+	value = app_service.load_balancer_ingress.hostname
+}
+
+
+
+	
