@@ -323,14 +323,23 @@ resource "kubernetes_persistent_volume_claim" "mongo_pvc" {
 ```
 
 
-Service Resource in EKS Cluster creates the load balancer in Cluster based on the `type` parameter. There are three types of services. They are as follows:
+**Service Resource** in EKS Cluster creates the load balancer in Cluster based on the `type` parameter. There are three types of services. They are as follows:
+
 a. LoadBalancer
+
 	The EKS Cluster luanches the load balancer i.e Network,Application and Classic type load balancers.
+
 b. ClusterIP
-	The service created with this type will not be accessible from outside network, i.e; It will be connected only from the worker nodes
+
+	The service created with this type will not be accessible from outside network, i.e; It will be connected only 
+	from the worker nodes
+
 c. NodeIP
+
 	It is used for application external access from outside the woker nodes.
 	
+HCL Code to create service resource for internal connecctivity of database pod withn the application pod
+
 ```
 ## Kubernetes Service resource for Database server
 
