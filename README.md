@@ -361,3 +361,28 @@ resource "kubernetes_service" "monogo_service" {
         }
 }
 ```
+
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|:----:|:-----:|:-----:|
+| region_name | Default Region Name for Infrastructure | string | `` | yes |
+| user_profile | IAM Credentials of AWS Account with required priviledges | string | `` | yes |
+| vpc_id | VPC Id to launch the EKS Cluster | string | `` | yes |
+| eks_role_name | Role Name  to be attached with EKS Cluster | string | `` | yes |
+| eks_cluster_name | Name for EKS Cluster | string | `eks-cluster` | no |
+| node_group_role_name | Role Name  to be attached with EKS Cluster Node group | string | `` | yes |
+| eks_node_group_name_1 | Name for the 1st Node Group | string | `` | yes |
+| eks_node_group_name_2 | Name for the 2st Node Group | string | `` | yes |
+| worker_node_ip_file_name | Name of file to store Public IPs of worker nodes | string | `hosts` | no |
+| mongo_db_port | Mongo Database Server Port | number | `27017`| yes |
+| mongo_db_storage | Storage Requirement for Persitent Volume in Database server pod | string | `1Gi` | yes |
+| efs_storage_provisioner_name | Provisioner Name | lstring | `aws-eks/efs` | no |
+| mongo_db_pvc_access_mode | List of access modes (e.g. ReadWriteMany, ReadWriteOnce) | list(string) | `["ReadWriteMany"]` | yes |
+| db_image_name | Docker image name for Database Server | string | `` | yes |
+| mongo_volume_name | Mongo persistentvolume name | string | `mongo-persistent-vol` | no |
+| mongo_data_directory | Data directory for Database Server | string | `/data/db` | yes |
+| app_image_name | Docker image name for Application Server | string | `` | yes |
+| app_port | Application Port for external Connectivity | number | `80` | yes |
+| app_container_port | Port of Application running in Pod | number | `3000` | yes |
