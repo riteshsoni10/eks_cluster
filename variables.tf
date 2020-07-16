@@ -27,7 +27,6 @@ variable "eks_cluster_name" {
 
 variable "node_group_role_name" {
 	type= string
-	default= "NodeGroup-Role"
         description = "Node Group role name"
 }
 
