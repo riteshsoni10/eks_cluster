@@ -100,7 +100,7 @@ resource "aws_iam_role_policy_attachment" "AmazonEKSServicePolicy" {
 ```
 
 <p align="center">
-  <img src="/screenshots/eks_iam_policyattach.png" title="IAM Policy Attached">
+  <img src="/screenshots/eks_iam_role_policyattach.png" title="IAM Policy Attached">
   <br>
   <em>Fig 3.: EKS IAM Policy Attach </em>
 </p>
