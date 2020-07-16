@@ -1,5 +1,19 @@
 region_name = "ap-south-1"
 user_profile = "aws_terraform_user"
-
-
-
+eks_role_name = "eks_cluster_role"
+vpc_id = 
+eks_cluster_name = "eks-Cluster"
+node_group_role_name ="NodeGroup-Role"
+eks_node_group_name_1 = "ng_1"
+eks_node_group_name_2 = "ng_2"
+worker_node_ip_file_name = "hosts"
+mongo_db_port = 27017
+mongo_db_storage = "1Gi"
+efs_storage_provisioner_name = "eks/aws-efs"
+mongo_db_pvc_access_mode =  ["ReadWriteMany"]
+db_image_name = "riteshsoni296/mongo_server"
+mongo_volume_name = "mongo-persistent-vol"
+mongo_data_directory = "/data/db"
+app_image_name = "riteshsoni296/nodejs_app:v1"
+app_port = 80
+app_container_port = 3000
