@@ -372,6 +372,23 @@ resource "kubernetes_secret" "mongo_secret" {
 The deployment kubernetes resource is created to implement fault tolerance behaviour while running pods i.e, to restart the application pods in case anyone of them fails.
 
 
+
+# Usage Instructions
+
+You should have configured IAM profile in the controller node and all the pre-requisites. 
+
+1. Clone this repository
+2. Change the working directory to `automation_script`
+3. Switch to the Admin or root user on controller node.
+4. Run `terraform init`
+5. Then, `terraform plan`, to see the list of resources that will be created
+6. Then, `terraform apply -auto-approve`
+
+When you are done playing
+```sh
+terraform destroy -auto-approve
+```
+
 ## Inputs
 
 | Name | Description | Type | Default | Required |
