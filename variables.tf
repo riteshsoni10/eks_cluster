@@ -126,3 +126,24 @@ variable "app_data_directory"{
         type    = string
         default = "/usr/src/app"
 }
+
+
+variable "worker_nodes_key_name"{
+        type = string
+        description = "KeyName to SSH in Worker Nodes"
+        default = "worker-nodes-key"
+}
+
+variable "node_group_1_instance_types" {
+        type = list(string)
+        description = "Instance Types for Node Group 1"
+        default = ["t2.micro"]
+
+}
+
+variable "node_group_2_instance_types" {
+        type = list(string)
+        description = "Instance Types for Node Group 2"
+        default = ["t2.small"]
+
+}
