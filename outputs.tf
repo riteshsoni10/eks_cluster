@@ -37,7 +37,7 @@ output "node_group_arn" {
 }
 
 output "application_lb_end_point" {
-	value = app_service.load_balancer_ingress.hostname
+	value = kubernetes_service.app_service.load_balancer_ingress.hostname
 }
 
 
