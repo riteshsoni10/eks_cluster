@@ -78,6 +78,13 @@ resource "aws_iam_role" "eks_role" {
 }
 ```
 
+<p align="center">
+  <img src="/screenshots/eks_iam_role.png" title="IAM Role">
+  <br>
+  <em>Fig 2.: EKS IAM Role </em>
+</p>
+
+
 HCL code to attach required policies to the role
 
 ```sh
@@ -92,6 +99,13 @@ resource "aws_iam_role_policy_attachment" "AmazonEKSServicePolicy" {
 }
 ```
 
+<p align="center">
+  <img src="/screenshots/eks_iam_policy_attach.png" title="IAM Policy Attached">
+  <br>
+  <em>Fig 3.: EKS IAM Policy Attach </em>
+</p>
+	
+	
 HCL code to create EKS Cluster with input variables `eks_cluster_name`
 
 ```
@@ -165,6 +179,35 @@ ansible-playbook -i ${var.worker_node_ip_file_name} efs-software-install.yml -u 
 --private-key ${local_file.store_instance_key.filename} --ssh-extra-args='-o stricthostkeychecking=no
 ```
 
+<p align="center">
+  <img src="/screenshots/terraform_apply_3.png" width="950" title="EFS Enable">
+  <br>
+  <em>Fig 4.: EFS Enable on Worker Nodes </em>
+</p>
+
+
+**InstancePrivate Key**
+
+The Private Key is genreated and attached to the node groups to enable remote access to the EKS cluster Worker nodes. The SSH key is used to remotely install needed softwares on worker nodes for EFS enable.
+
+```
+resource "aws_key_pair" "create_instance_key_pair"{
+        key_name = "automation"
+        public_key = tls_private_key.instance_key.public_key_openssh
+
+		depends_on = [
+			tls_private_key.instance_key
+		]
+}
+```
+
+<p align="center">
+  <img src="/screenshots/worker_node_key_pair_plan.png" width="950" title="Terraform Plan">
+  <br>
+  <em>Fig 5.: Plan for Private Key </em>
+</p>
+
+
 ## Elastic File System
 
 Elastic File System is file storage as Service provided by the Amazon Web Services. EFS works in a similiar way as Network File System. We will be creating EFS and allowing ingress traffic on TCP port 2049 i.e NFS Server port.
@@ -202,6 +245,12 @@ resource "aws_security_group" "efs_security_group"{
 	}
 }
 ```
+
+<p align="center">
+  <img src="/screenshots/efs_security_plan.png" title="EFS Security Group">
+  <br>
+  <em>Fig 6.: EFS Security Group </em>
+</p>
 
 
 ## EFS-Provisioner
@@ -269,6 +318,12 @@ resource "kubernetes_storage_class" "efs_storage_class" {
 }
 ```
 
+<p align="center">
+  <img src="/screenshots/efs_storage_class_plan.png" title="EFS  Storage Class">
+  <br>
+  <em>Fig 7.: EFS Storage Class</em>
+</p>
+
 
 ## Application Deployment 
 
@@ -306,6 +361,12 @@ resource "kubernetes_persistent_volume_claim" "mongo_pvc" {
 }
 ```
 
+<p align="center">
+  <img src="/screenshots/mongo_pvc_plan.png" title="PVC Resource">
+  <br>
+  <em>Fig 8.: Mongo DB Persistent Volume </em>
+</p>
+								  
 ### Service Resource 
 
 **Service Resource** in EKS Cluster creates the load balancer in Cluster based on the `type` parameter. There are three types of services. They are as follows:
@@ -345,6 +406,13 @@ resource "kubernetes_service" "monogo_service" {
 }
 ```
 
+<p align="center">
+  <img src="/screenshots/mongo_service_plan.png" width="950" title="">
+  <br>
+  <em>Fig 9.: Kubernetes Service Resource </em>
+</p>
+
+
 ### Secret Resource
 
 Secret resource is used to encode the confidentials in kubernetes cluster. 
@@ -367,6 +435,13 @@ resource "kubernetes_secret" "mongo_secret" {
 }
 ```
 
+<p align="center">
+  <img src="/screenshots/mongo_secret_plan.png title="Secret Resource">
+  <br>
+  <em>Fig 10.: Mongo DB Secret Resource </em>
+</p>
+
+
 ### Deployment Resource
 
 The deployment kubernetes resource is created to implement fault tolerance behaviour while running pods i.e, to restart the application pods in case anyone of them fails.
@@ -382,7 +457,26 @@ You should have configured IAM profile in the controller node and all the pre-re
 3. Switch to the Admin or root user on controller node.
 4. Run `terraform init`
 5. Then, `terraform plan`, to see the list of resources that will be created
+
+<p align="center">
+  <img src="/screenshots/terraform_apply_1.png" width="950" title="Resources Progress ">
+  <br>
+  <em>Fig 11.: AWS Resources Progress </em>
+</p>
+
+<p align="center">
+  <img src="/screenshots/terraform_apply_2.png" width="950" title="Resources Progress ">
+  <br>
+  <em>Fig 12.: AWS Resources Progress </em>
+</p>
+
 6. Then, `terraform apply -auto-approve`
+
+<p align="center">
+  <img src="/screenshots/terraform_apply.png" width="950" title="Resources Created ">
+  <br>
+  <em>Fig 13.: AWS Resources Created </em>
+</p>
 
 When you are done playing
 ```sh
@@ -430,3 +524,32 @@ terraform destroy -auto-approve
 | eks_cluster_role_arn | IAM Role ARN for EKS Cluster |
 | node_group_arn | IAM Role ARN for Node Group|
 | application_lb_end_point | Application Load Balancer Endpoint|
+
+## Screenshots
+
+1. EFS Cluster
+
+<p align="center">
+  <img src="/screenshots/aws_efs.png" width="950" title="AWS EFS">
+  <br>
+  <em>Fig 14.: AWS EFS Cluster </em>
+</p>
+
+
+2. AWS EKS Cluster
+
+<p align="center">
+  <img src="/screenshots/aws_eks_cluster.png" width="950" title="EKS Service">
+  <br>
+  <em>Fig 15.: AWS EKS Cluster</em>
+</p>
+
+
+3. AWS EC2 Worker Nodes
+
+<p align="center">
+  <img src="/screenshots/aws_efs.png" width="950" title="AWS EC2 Worker Nodes">
+  <br>
+  <em>Fig 16.: EKS Cluster Worker Nodes </em>
+</p>
+
