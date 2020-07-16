@@ -278,7 +278,7 @@ resource "kubernetes_deployment" "efs_provisioner_deployment" {
 }
 ```
 
-We need to configure the parameter `automount_service_account_token` to *true*, since when the resource is launched using terraform code, the *service_accounts* are not mounted to the application pods when they are launched. A **service account** provides an identity for processes that run in a Pod. It helps to assign special priviledges to the application Pods.
+We need to configure the parameter `automount_service_account_token` to *true*, since when the resource is launched using terraform code, the *service_accounts* are not mounted to the application pods. A **service account** provides an identity for processes that run in a Pod. It helps to assign special priviledges to the application Pods.
 
 The `locals` block is used to define local variables in the code.
 
@@ -312,10 +312,13 @@ The various different strategies are as follows:
     
 **e. A/B testing**
 
-	Release a new version to a subset of users in a precise way (HTTP headers, cookie, weight, etc.). A/B testing is really a technique for making business decisions based on statistics but we will briefly describe the process. This doesn’t come out of the box with Kubernetes, it implies extra work to setup a more advanced infrastructure (Istio, Linkerd, Traefik, custom nginx/haproxy, etc).
+	Release a new version to a subset of users in a precise way (HTTP headers, cookie, weight, etc.). A/B testing is really
+	a technique for making business decisions based on statistics but we will briefly describe the process. This doesn’t 
+	come out of the box with Kubernetes, it implies extra work to setup a more advanced infrastructure (Istio, Linkerd, 
+	Traefik, custom nginx/haproxy, etc).
 
 
-There are two types of volume provisioning  i.e static and dynamic. In dynamic volume provisioning `Persistent Volume Claim` requests the storage directly from the Storage Class. Since, we will be using EFS service for PVC, so we need to create custom storage class to provision volumes.
+There are two types of **volume provisioning**  i.e *static* and *dynamic*. In `dynamic` volume provisioning `Persistent Volume Claim` requests the storage directly from the Storage Class. Since, we will be using EFS service for PVC, so we need to create custom storage class to provision volumes.
 
 ```
 ## EFS Storage Class
@@ -432,6 +435,90 @@ resource "kubernetes_secret" "mongo_secret" {
 ```
 
 ### Deployment Resource
+
+
+```
+locals {
+        mongo_db_env_variables ={
+                "MONGO_INITDB_ROOT_USERNAME": "root_username"
+                "MONGO_INITDB_ROOT_PASSWORD" : "root_password"
+                "MONGO_INITDB_USERNAME" : "username"
+                "MONGO_INITDB_PASSWORD" : "password"
+                "MONGO_INITDB_DATABASE" : "database"
+        }
+}
+
+## Deployment Resource
+resource "kubernetes_deployment" "mongo_deployment" {
+        depends_on = [
+                aws_eks_node_group.eks_node_group,
+                aws_eks_node_group.eks_node_group_2,
+                kubernetes_persistent_volume_claim.mongo_pvc,
+                kubernetes_secret.mongo_secret,
+        ]
+        metadata {
+                name = "mongo-db-deploy"
+                labels = {
+                        app = "mongo_db"
+                }
+        }
+        spec{
+                selector {
+                        match_labels = {
+                                app = "database"
+                                tier = "backend"
+                        }
+                }
+                strategy {
+                        type = "Recreate"
+                }
+                template {
+                        metadata {
+                                name = "database-pod"
+                                labels = {
+                                        app = "database"
+                                        tier = "backend"
+                                }
+                        }
+                        spec {
+                                container {
+                                        name = "db-container"
+                                        image = var.db_image_name
+                                        port {
+                                                name = "database-port"
+                                                container_port =  var.mongo_db_port
+                                        }
+                                        dynamic "env" {
+                                                for_each = local.mongo_db_env_variables
+                                                content {
+                                                        name  = env.key
+                                                        value_from {
+                                                                secret_key_ref {
+                                                                        name = kubernetes_secret.mongo_secret.metadata[0].name
+                                                                        key = env.value
+                                                                }
+                                                        }
+                                                }
+                                        }
+                                        volume_mount{
+                                                name= var.mongo_volume_name
+                                                mount_path= var.mongo_data_directory
+                                        }
+                                }
+                                volume {
+                                        name= var.mongo_volume_name
+                                        persistent_volume_claim {
+                                                claim_name= kubernetes_persistent_volume_claim.mongo_pvc.metadata[0].name
+                                        }
+                                }
+                        }
+                }
+        }
+}
+
+```
+
+
 
 ## Inputs
 
