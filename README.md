@@ -157,15 +157,196 @@ We need to install software on all the worker nodes to enable high availability 
 aws ec2 describe-instances  --query \"Reservations[*].Instances[?Tags[?Key=='eks:cluster-name'&&Value=='${var.eks_cluster_name}']&&State.Name=='running'].[PublicIpAddress]\" --profile ${var.user_profile} --output text 
 ```
 
-We will be storing the Public IPs in the `hosts` file to be used in ansible automation too install the softwares in the worker nodes.
+We will be storing the Public IPs in the `hosts` file to be used in ansible automation too install the softwares in the worker nodes.The playbook is present in the reposritory with name *efs-software-install.yml*.
 
 ```
 ansible-playbook -i ${var.worker_node_ip_file_name} efs-software-install.yml -u ec2-user --private-key ${local_file.store_instance_key.filename} --ssh-extra-args='-o stricthostkeychecking=no
 ```
 
+## Elastic File System
+
+Elastic File System is file storage as Service provided by the Amazon Web Services. EFS works in a similiar way as Network File System. We will be creating EFS and allowing ingress traffic on TCP port 2049 i.e NFS Server port.
 
 
+```
+resource "aws_efs_file_system" "nfs_server" {
+  creation_token = "eks-efs-cluster"
+  tags = {
+    Name = "EKS_Cluster_NFS"
+  }
+}
+```
+
+Ingress or Security group for the Elastic File System Service
+
+```
+## Security Group for EFS Cluster
+resource "aws_security_group" "efs_security_group"{
+	name = "allow_nfs_traffic"
+	description = "Allow NFS Server Port Traffic from EKS Cluster"
+	vpc_id = var.vpc_id
+
+	ingress {
+		description = "NFS Port"
+		from_port = 2049
+		to_port = 2049
+		protocol = "tcp"
+		cidr_blocks = [data.aws_vpc.vpc_details.cidr_block]
+	}
+	egress {
+		from_port = 0
+		to_port = 0
+		protocol = "-1"
+		cidr_blocks = ["0.0.0.0/0"]
+	}
+}
+```
 
 
+## EFS-Provisioner
+
+The Kubernetes does not have by-default support for EFS Storage Provisioner. We need to create custom Storage class to provision the peristent volumes for the kubernetes pods. S will be creating deployment resource in kubernetes  
+
+HCL Code to create EFS-deployment resource
+
+```
+## EFS Storage Class Custom Provisioner Deployment
+locals {
+	env_variables ={
+		"FILE_SYSTEM_ID": aws_efs_mount_target.efs_mount_details[0].file_system_id
+		"AWS_REGION" : var.region_name
+		"PROVISIONER_NAME" : var.efs_storage_provisioner_name
+	}
+}
+
+resource "kubernetes_deployment" "efs_provisioner_deployment" {
+	depends_on = [
+		aws_eks_node_group.eks_node_group,
+		aws_eks_node_group.eks_node_group_2,
+		kubernetes_cluster_role_binding.efs_provisioner_role_binding,
+	]
+	metadata {
+		name = "efs-provisioner"
+		namespace = "eks-efs"
+	}
+	spec {
+		replicas = 1
+		selector {
+			match_labels = {
+				app = "efs-provisioner"
+			}
+		}
+		strategy {
+			type = "Recreate"
+		}
+		template {
+			metadata{
+				labels = {
+					app = "efs-provisioner"
+				}
+			}
+			spec {
+				service_account_name = "efs-sa"
+				automount_service_account_token = true
+				container {
+					image = "quay.io/external_storage/efs-provisioner:v0.1.0"
+					name = "efs-provisioner"
+					dynamic "env" {
+					    for_each = local.env_variables
+					    content {
+					      name  = env.key
+					      value = env.value
+					    }
+					  }
+					volume_mount {
+						name = "pv-volume"
+            					mount_path = "/persistentvolumes"
+					}
+				}
+				volume {
+					name = "pv-volume"
+					nfs {
+						path = "/"
+						server = aws_efs_mount_target.efs_mount_details[0].dns_name
+					}
+				}
+			}
+		}
+	}
+}
+```
+
+We would require to create our own custom storage class. There are two types of volume provisioning  i.e static and dynamic. In dynamic volume provisioning `Persistent Volume Claim` requests the storage directly from the Storage Class. 
+
+```
+## EFS Storage Class
+resource "kubernetes_storage_class" "efs_storage_class" {
+	metadata {
+		name = "aws-efs-sc"
+	}
+	storage_provisioner = var.efs_storage_provisioner_name
+	parameters ={
+		fsType = "xfs"
+		type = "gp2"
+	}
+ 	depends_on = [
+		kubernetes_deployment.efs_provisioner_deployment
+	]
+}
+```
+
+## Application Deployment 
+
+The Application deploymenent in EKS cluster. Persistent volume claim resource is created to make the data stored in the database pods permanent 
+
+```
+## Persistent Volume for Database Pods
+resource "kubernetes_persistent_volume_claim" "mongo_pvc" {
+        depends_on = [
+                kubernetes_storage_class.efs_storage_class
+        ]
+        metadata {
+                name = "mongo-db-pvc"
+                annotations = {
+                        "volume.beta.kubernetes.io/storage-class" = kubernetes_storage_class.efs_storage_class.id
+                }
+        }
+        spec {
+                resources {
+                        requests = {
+                                storage = var.mongo_db_storage
+                        }
+                }
+                access_modes = var.mongo_db_pvc_access_mode
+        }
+}
+```
 
 
+Service Resource in EKS Cluster creates the load balancer in Cluster based on the `type` parameter. There are three types of services. They are as follows:
+a. LoadBalancer
+	The EKS Cluster luanches the load balancer i.e Network,Application and Classic type load balancers.
+b. ClusterIP
+	The service created with this type will not be accessible from outside network, i.e; It will be connected only from the worker nodes
+c. NodeIP
+	It is used for application external access from outside the woker nodes.
+	
+```
+## Kubernetes Service resource for Database server
+
+resource "kubernetes_service" "monogo_service" {
+        metadata {
+                name = "mongo-db-svc"
+        }
+        spec{
+                selector = {
+                        app = kubernetes_deployment.mongo_deployment.spec[0].template[0].metadata[0].labels.app
+                        tier = kubernetes_deployment.mongo_deployment.spec[0].template[0].metadata[0].labels.tier
+                }
+                port {
+                        port = var.mongo_db_port
+                }
+                cluster_ip = "None"
+        }
+}
+```
