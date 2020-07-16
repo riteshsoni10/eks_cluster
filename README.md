@@ -180,7 +180,7 @@ ansible-playbook -i ${var.worker_node_ip_file_name} efs-software-install.yml -u 
 ```
 
 <p align="center">
-  <img src="/screenshots/terraform_apply_3.png" width="950" title="EFS Enable">
+  <img src="/screenshots/terraform_apply_3.png" width="1000" title="EFS Enable">
   <br>
   <em>Fig 4.: EFS Enable on Worker Nodes </em>
 </p>
@@ -247,7 +247,7 @@ resource "aws_security_group" "efs_security_group"{
 ```
 
 <p align="center">
-  <img src="/screenshots/efs_security_plan.png" title="EFS Security Group">
+  <img src="/screenshots/efs_security_group_plan.png" title="EFS Security Group">
   <br>
   <em>Fig 6.: EFS Security Group </em>
 </p>
@@ -436,7 +436,7 @@ resource "kubernetes_secret" "mongo_secret" {
 ```
 
 <p align="center">
-  <img src="/screenshots/mongo_secret_plan.png title="Secret Resource">
+  <img src="/screenshots/mongo_secret_plan.png" title="Secret Resource">
   <br>
   <em>Fig 10.: Mongo DB Secret Resource </em>
 </p>
