@@ -23,6 +23,7 @@ variable "vpc_id" {
 variable "eks_cluster_name" {
 	type = string
         description = "Cluster Name"
+	default = "eks-cluster"
 }
 
 variable "node_group_role_name" {
