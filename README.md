@@ -344,7 +344,8 @@ resource "kubernetes_persistent_volume_claim" "mongo_pvc" {
 **b. ClusterIP**
 
 	The service created with this type will not be accessible from outside network, i.e; It will be connected 
-	only from the worker nodes
+	only from the worker nodes. Service name can be used for interaction between applications if ClusterIP is
+	set to `None`.
 
 **c. NodeIP**
 
