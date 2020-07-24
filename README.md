@@ -10,6 +10,10 @@ MERN Stack Application Deployment on Kuberenetes Cluster using Elastic Kubernete
 
 **Operating System** : Redhat Enterprise Linux 7 and above
 
+> Note:
+>
+>Since windows and linux have different escape expansion methods, would request you to run the scripts on Linux OS.
+
 ### Software Pre-Requisites:
  - Ansible
  - Terraform
