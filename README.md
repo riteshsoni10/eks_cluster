@@ -531,7 +531,7 @@ terraform destroy -auto-approve
 
 ## Screenshots
 
-1. EFS Cluster
+**1. EFS Cluster**
 
 <p align="center">
   <img src="/screenshots/aws_efs.png" width="950" title="AWS EFS">
@@ -540,7 +540,7 @@ terraform destroy -auto-approve
 </p>
 
 
-2. AWS EKS Cluster
+**2. AWS EKS Cluster**
 
 <p align="center">
   <img src="/screenshots/aws_eks_cluster.png" width="950" title="EKS Service">
@@ -549,7 +549,7 @@ terraform destroy -auto-approve
 </p>
 
 
-3. AWS EC2 Worker Nodes
+**3. AWS EC2 Worker Nodes**
 
 <p align="center">
   <img src="/screenshots/aws_efs.png" width="950" title="AWS EC2 Worker Nodes">
@@ -557,6 +557,16 @@ terraform destroy -auto-approve
   <em>Fig 16.: EKS Cluster Worker Nodes </em>
 </p>
 
+
+**4. Application Initial Welcome Page**
+
+The application can be accessed using ELB Endpoint
+
+<p align="center">
+  <img src="screenshots/welcome_page.png" width="450" title="Welcome Page">
+  <br>
+  <em>Fig 17.: Application Welcome Page </em>
+</p>
 
 
 > **Source**: LinuxWorld Informatics Pvt Ltd. Jaipur
