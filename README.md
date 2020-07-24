@@ -297,10 +297,10 @@ The various different strategies are as follows:
     
 **e. A/B testing**
 
-	Release a new version to a subset of users in a precise way (HTTP headers, cookie, weight, etc.). A/B testing is really
-	a technique for making business decisions based on statistics but we will briefly describe the process. This doesn’t 
-	come out of the box with Kubernetes, it implies extra work to setup a more advanced infrastructure (Istio, Linkerd, 
-	Traefik, custom nginx/haproxy, etc).
+	Release a new version to a subset of users in a precise way (HTTP headers, cookie, weight, etc.). A/B testing
+	is really a technique for making business decisions based on statistics but we will briefly describe the 
+	process. This doesn’t come out of the box with Kubernetes, it implies extra work to setup a more advanced 
+	infrastructure (Istio, Linkerd,	Traefik, custom nginx/haproxy, etc).
 
 
 There are two types of **volume provisioning**  i.e *static* and *dynamic*. In `dynamic` volume provisioning `Persistent Volume Claim` requests the storage directly from the Storage Class. Since, we will be using EFS service for PVC, so we need to create custom storage class to provision volumes.
