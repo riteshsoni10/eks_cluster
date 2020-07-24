@@ -1,7 +1,7 @@
 region_name = "ap-south-1"
 user_profile = "aws_terraform_user"
 eks_role_name = "eks_cluster_role"
-vpc_id = 
+vpc_id = "vpc-00ds785"
 eks_cluster_name = "eks-Cluster"
 node_group_role_name ="NodeGroup-Role"
 eks_node_group_name_1 = "ng_1"
