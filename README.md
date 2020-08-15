@@ -505,7 +505,7 @@ terraform destroy -auto-approve
 | worker_node_ip_file_name | Name of file to store Public IPs of worker nodes | string | `hosts` | no |
 | mongo_db_port | Mongo Database Server Port | number | `27017`| yes |
 | mongo_db_storage | Storage Requirement for Persitent Volume in Database server pod | string | `1Gi` | yes |
-| efs_storage_provisioner_name | Provisioner Name | lstring | `aws-eks/efs` | no |
+| efs_storage_provisioner_name | Provisioner Name | string | `aws-eks/efs` | no |
 | mongo_db_pvc_access_mode | List of access modes (e.g. ReadWriteMany, ReadWriteOnce) | list(string) | `["ReadWriteMany"]` | yes |
 | db_image_name | Docker image name for Database Server | string | `` | yes |
 | mongo_volume_name | Mongo persistentvolume name | string | `mongo-persistent-vol` | no |
